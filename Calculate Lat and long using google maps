@@ -1,0 +1,40 @@
+pip install googlemaps
+
+df = pd.read_excel("/content/sample_data/DR_Addres_Septiembre_v1.xlsx", sheet_name='2_fase')
+
+import googlemaps
+
+KEY = 'your_key'
+gmaps = googlemaps.Client(key=KEY)
+
+def get_coordinates(address):
+    city = '<City Name>, <Country>'
+    geocode_result = gmaps.geocode(str(address) +' '+ city)
+    if len(geocode_result) > 0:
+        return list(geocode_result[0]['geometry']['location'].values())
+        
+    else:
+        return [np.NaN, np.NaN]
+        
+lat = []
+long = []
+for row in df['Full Address']:
+    addr = get_coordinates(row)
+    if addr is None:
+        lat.append(None)
+        long.append(None)
+    else:
+        latitude = addr[0]
+        longitude = addr[1]  
+    
+        lat.append(latitude)
+        long.append(longitude)
+        
+        
+ df['latitude_API_v3'] = lat
+df['longitude_API_v3'] = long
+
+#Exportar coordenadas Country
+df.to_csv('DR_Addres_Septiembre_v3.csv')
+from google.colab import files
+files.download("DR_Addres_Septiembre_v3.csv")
